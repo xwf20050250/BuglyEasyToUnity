@@ -1,3 +1,6 @@
 /Library/
 /Logs/
 /Temp/
+/.vs/
+/obj/
+/Release_Android/

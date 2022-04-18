@@ -1,25 +1,67 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
+
 public class Main : MonoBehaviour
 {
-    void Start()
+    public Button nullBtn;
+    public Button errorBtn;
+    public Button enableLogBtn;
+    public Button debugBuglyBtn;
+    public Button warningBtn;
+
+    private static string TAG = "UPDATE_SYSTEM";
+    private static string InitTag
     {
-
-#if   UNITY_IOS
-        BuglyAgent.InitWithAppId ("your ios app id");
-#elif UNITY_ANDROID
-		//GamePlayerActivity已初始化，此处不需要再调用。
-#endif
-
-        BuglyAgent.ConfigDebugMode(false);
-        BuglyAgent.EnableExceptionHandler();
-
-        Test();
+        get
+        {
+            return string.Format(@"[{0} {1}]: ", System.DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss"), TAG);
+        }
     }
 
-    void Test()
+    private void Start()
     {
-        print("Test Bugly NullReferenceException");
+        nullBtn.onClick.AddListener(OnBtnNullClicked);
+        errorBtn.onClick.AddListener(OnBtnErrorClicked);
+        enableLogBtn.onClick.AddListener(OnBtnEnableLogClicked);
+        debugBuglyBtn.onClick.AddListener(OnBtnDebugBuglyClicked);
+        warningBtn.onClick.AddListener(OnBtnWarningClicked);
+        BuglyAgent.InitWithAppId("80fa77d7fb");
+        BuglyAgent.ConfigDebugMode(true);
+        BuglyCustom.Init();
+        BuglyCustom.SetCustomLog(BuglyCustom.E_TYPE.E_BUILD_MARK, "E_BUILD_MARK");
+        BuglyAgent.SetLogCallbackExtrasHandler(BuglyCustom.GetCustomDict);
+        BuglyAgent.EnableExceptionHandler();
+        Debug.unityLogger.logEnabled = true;
+    }
+
+    private void OnBtnNullClicked()
+    {
+        Debug.Log("Test Bugly NullReferenceException");
         GameObject go = null;
         go.name = "";
+    }
+
+    private void OnBtnErrorClicked()
+    {
+        Debug.LogErrorFormat($"{InitTag}11111111111111");
+    }
+
+    private void OnBtnWarningClicked()
+    {
+        Debug.LogWarningFormat($"{InitTag}222222222222");
+    }
+
+    private void OnBtnEnableLogClicked()
+    {
+        Debug.unityLogger.logEnabled = !Debug.unityLogger.logEnabled;
+        enableLogBtn.transform.Find("Text").GetComponent<Text>().text = $"EnableLog-{Debug.unityLogger.logEnabled}";
+    }
+
+    bool m_debugBugly = true;
+    private void OnBtnDebugBuglyClicked()
+    {
+        m_debugBugly = !m_debugBugly;
+        BuglyAgent.ConfigDebugMode(m_debugBugly);
+        debugBuglyBtn.transform.Find("Text").GetComponent<Text>().text = $"DebugBugly-{m_debugBugly}";
     }
 }
