@@ -13,6 +13,6 @@ public class GamePlayerActivity extends UnityPlayerActivity
     {
         super.onCreate(savedInstanceState);
 
-        CrashReport.initCrashReport(getApplicationContext(),"android app id", false);
+        //CrashReport.initCrashReport(getApplicationContext(),"android app id", false);
     }
 }

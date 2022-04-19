@@ -42,18 +42,19 @@ public enum LogSeverity
 /// </summary>
 public sealed class BuglyAgent
 {
-    
+
     // Define delegate support multicasting to replace the 'Application.LogCallback'
-    public delegate void LogCallbackDelegate (string condition,string stackTrace,LogType type);
+    public delegate void LogCallbackDelegate(string condition, string stackTrace, LogType type);
 
     /// <summary>
     /// Configs the type of the crash reporter and customized log level to upload
     /// </summary>
     /// <param name="type">Type. Default=0, 1=Bugly v2.x MSDK=2</param>
     /// <param name="logLevel">Log level. Off=0,Error=1,Warn=2,Info=3,Debug=4</param>
-    public static void ConfigCrashReporter(int type, int logLevel){
-        _SetCrashReporterType (type);
-        _SetCrashReporterLogLevel (logLevel);
+    public static void ConfigCrashReporter(int type, int logLevel)
+    {
+        _SetCrashReporterType(type);
+        _SetCrashReporterLogLevel(logLevel);
     }
 
     /// <summary>
@@ -61,26 +62,28 @@ public sealed class BuglyAgent
     /// <para>This will initialize sdk to report native exception such as obj-c, c/c++, java exceptions, and also enable c# exception handler to report c# exception logs</para>
     /// </summary>
     /// <param name="appId">App identifier.</param>
-    public static void InitWithAppId (string appId)
+    public static void InitWithAppId(string appId)
     {
-        if (IsInitialized) {
-            DebugLog (null, "BuglyAgent has already been initialized.");
-            
+        if (IsInitialized)
+        {
+            DebugLog(null, "BuglyAgent has already been initialized.");
+
             return;
         }
-        
-        if (string.IsNullOrEmpty (appId)) {
+
+        if (string.IsNullOrEmpty(appId))
+        {
             return;
         }
-        
+
         // init the sdk with app id
-        InitBuglyAgent (appId);
-        DebugLog (null, "Initialized with app id: {0}", appId);
-        
+        InitBuglyAgent(appId);
+        DebugLog(null, "Initialized with app id: {0}", appId);
+
         // Register the LogCallbackHandler by Application.RegisterLogCallback(Application.LogCallback)
-        _RegisterExceptionHandler ();
+        _RegisterExceptionHandler();
     }
-    
+
     /// <summary>
     /// Only Enable the C# exception handler. 
     /// 
@@ -99,19 +102,20 @@ public sealed class BuglyAgent
     /// </para>
     /// 
     /// </summary>
-    public static void EnableExceptionHandler ()
+    public static void EnableExceptionHandler()
     {
-        if (IsInitialized) {
-            DebugLog (null, "BuglyAgent has already been initialized.");
+        if (IsInitialized)
+        {
+            DebugLog(null, "BuglyAgent has already been initialized.");
             return;
         }
-        
-        DebugLog (null, "Only enable the exception handler, please make sure you has initialized the sdk in the native code in associated Android or iOS project.");
-        
+
+        DebugLog(null, "Only enable the exception handler, please make sure you has initialized the sdk in the native code in associated Android or iOS project.");
+
         // Register the LogCallbackHandler by Application.RegisterLogCallback(Application.LogCallback)
-        _RegisterExceptionHandler ();
+        _RegisterExceptionHandler();
     }
-    
+
     /// <summary>
     /// Registers the log callback handler. 
     /// 
@@ -121,136 +125,145 @@ public sealed class BuglyAgent
     /// <para></para>
     /// </summary>
     /// <param name="handler">Handler.</param>
-    public static void RegisterLogCallback (LogCallbackDelegate handler)
+    public static void RegisterLogCallback(LogCallbackDelegate handler)
     {
-        if (handler != null) {
-            DebugLog (null, "Add log callback handler: {0}", handler);
-            
+        if (handler != null)
+        {
+            DebugLog(null, "Add log callback handler: {0}", handler);
+
             _LogCallbackEventHandler += handler;
         }
     }
-    
+
     /// <summary>
     /// Sets the log callback extras handler.
     /// </summary>
     /// <param name="handler">Handler.</param>
-    public static void SetLogCallbackExtrasHandler(Func<Dictionary<string, string>> handler){
-        if (handler != null) {
+    public static void SetLogCallbackExtrasHandler(Func<Dictionary<string, string>> handler)
+    {
+        if (handler != null)
+        {
             _LogCallbackExtrasHandler = handler;
-            
+
             DebugLog(null, "Add log callback extra data handler : {0}", handler);
         }
     }
-    
+
     /// <summary>
     /// Reports the exception.
     /// </summary>
     /// <param name="e">E.</param>
     /// <param name="message">Message.</param>
-    public static void ReportException (System.Exception e, string message)
+    public static void ReportException(System.Exception e, string message)
     {
-        if (!IsInitialized) {
+        if (!IsInitialized)
+        {
             return;
         }
-        
-        DebugLog (null, "Report exception: {0}\n------------\n{1}\n------------", message, e);
-        
-        _HandleException (e, message, false);
+
+        DebugLog(null, "Report exception: {0}\n------------\n{1}\n------------", message, e);
+
+        _HandleException(e, message, false);
     }
-    
+
     /// <summary>
     /// Reports the exception.
     /// </summary>
     /// <param name="name">Name.</param>
     /// <param name="message">Message.</param>
     /// <param name="stackTrace">Stack trace.</param>
-    public static void ReportException (string name, string message, string stackTrace)
+    public static void ReportException(string name, string message, string stackTrace)
     {
-        if (!IsInitialized) {
+        if (!IsInitialized)
+        {
             return;
         }
-        
-        DebugLog (null, "Report exception: {0} {1} \n{2}", name, message, stackTrace);
-        
-        _HandleException (LogSeverity.LogException, name, message, stackTrace, false);
+
+        DebugLog(null, "Report exception: {0} {1} \n{2}", name, message, stackTrace);
+
+        _HandleException(LogSeverity.LogException, name, message, stackTrace, false);
     }
-    
+
     /// <summary>
     /// Unregisters the log callback.
     /// </summary>
     /// <param name="handler">Handler.</param>
-    public static void UnregisterLogCallback (LogCallbackDelegate handler)
+    public static void UnregisterLogCallback(LogCallbackDelegate handler)
     {
-        if (handler != null) {
-            DebugLog (null, "Remove log callback handler");
-            
+        if (handler != null)
+        {
+            DebugLog(null, "Remove log callback handler");
+
             _LogCallbackEventHandler -= handler;
         }
     }
-    
+
     /// <summary>
     /// Sets the user identifier.
     /// </summary>
     /// <param name="userId">User identifier.</param>
-    public static void SetUserId (string userId)
+    public static void SetUserId(string userId)
     {
-        if (!IsInitialized) {
+        if (!IsInitialized)
+        {
             return;
         }
-        DebugLog (null, "Set user id: {0}", userId);
-        
-        SetUserInfo (userId);
+        DebugLog(null, "Set user id: {0}", userId);
+
+        SetUserInfo(userId);
     }
-    
+
     /// <summary>
     /// Sets the scene.
     /// </summary>
     /// <param name="sceneId">Scene identifier.</param>
-    public static void SetScene (int sceneId)
+    public static void SetScene(int sceneId)
     {
-        if (!IsInitialized) {
+        if (!IsInitialized)
+        {
             return;
         }
-        DebugLog (null, "Set scene: {0}", sceneId);
-        
-        SetCurrentScene (sceneId);
+        DebugLog(null, "Set scene: {0}", sceneId);
+
+        SetCurrentScene(sceneId);
     }
-    
+
     /// <summary>
     /// Adds the scene data.
     /// </summary>
     /// <param name="key">Key.</param>
     /// <param name="value">Value.</param>
-    public static void AddSceneData (string key, string value)
+    public static void AddSceneData(string key, string value)
     {
-        if (!IsInitialized) {
+        if (!IsInitialized)
+        {
             return;
         }
-        
-        DebugLog (null, "Add scene data: [{0}, {1}]", key, value);
-        
-        AddKeyAndValueInScene (key, value);
+
+        DebugLog(null, "Add scene data: [{0}, {1}]", key, value);
+
+        AddKeyAndValueInScene(key, value);
     }
-    
+
     /// <summary>
     /// Configs the debug mode.
     /// </summary>
     /// <param name="enable">If set to <c>true</c> debug mode.</param>
-    public static void ConfigDebugMode (bool enable)
+    public static void ConfigDebugMode(bool enable)
     {
-        EnableDebugMode (enable);
-        DebugLog (null, "{0} the log message print to console", enable ? "Enable" : "Disable");
+        EnableDebugMode(enable);
+        DebugLog(null, "{0} the log message print to console", enable ? "Enable" : "Disable");
     }
-    
+
     /// <summary>
     /// Configs the auto quit application.
     /// </summary>
     /// <param name="autoQuit">If set to <c>true</c> auto quit.</param>
-    public static void ConfigAutoQuitApplication (bool autoQuit)
+    public static void ConfigAutoQuitApplication(bool autoQuit)
     {
         _autoQuitApplicationAfterReport = autoQuit;
     }
-    
+
     /// <summary>
     /// Configs the auto report log level. Default is LogSeverity.LogError.
     /// <example>
@@ -259,11 +272,11 @@ public sealed class BuglyAgent
     /// </summary>
     /// 
     /// <param name="level">Level.</param> 
-    public static void ConfigAutoReportLogLevel (LogSeverity level)
+    public static void ConfigAutoReportLogLevel(LogSeverity level)
     {
         _autoReportLogLevel = level;
     }
-    
+
     /// <summary>
     /// Configs the default.
     /// </summary>
@@ -271,44 +284,47 @@ public sealed class BuglyAgent
     /// <param name="version">Version.</param>
     /// <param name="user">User.</param>
     /// <param name="delay">Delay.</param>
-    public static void ConfigDefault (string channel, string version, string user, long delay)
+    public static void ConfigDefault(string channel, string version, string user, long delay)
     {
-        DebugLog (null, "Config default channel:{0}, version:{1}, user:{2}, delay:{3}", channel, version, user, delay);
-        ConfigDefaultBeforeInit (channel, version, user, delay);
+        DebugLog(null, "Config default channel:{0}, version:{1}, user:{2}, delay:{3}", channel, version, user, delay);
+        ConfigDefaultBeforeInit(channel, version, user, delay);
     }
-    
+
     /// <summary>
     /// Logs the debug.
     /// </summary>
     /// <param name="tag">Tag.</param>
     /// <param name="format">Format.</param>
     /// <param name="args">Arguments.</param>
-    public static void DebugLog (string tag, string format, params object[] args)
+    public static void DebugLog(string tag, string format, params object[] args)
     {
-        if(!_debugMode) {
+        if (!_debugMode)
+        {
             return;
         }
 
-        if (string.IsNullOrEmpty (format)) {
+        if (string.IsNullOrEmpty(format))
+        {
             return;
         }
-        
-        Console.WriteLine ("[BuglyAgent] <Debug> - {0} : {1}", tag, string.Format (format, args));
+
+        Console.WriteLine("[BuglyAgent] <Debug> - {0} : {1}", tag, string.Format(format, args));
     }
-    
+
     /// <summary>
     /// Prints the log.
     /// </summary>
     /// <param name="level">Level.</param>
     /// <param name="format">Format.</param>
     /// <param name="args">Arguments.</param>
-    public static void PrintLog (LogSeverity level, string format, params object[] args)
+    public static void PrintLog(LogSeverity level, string format, params object[] args)
     {
-        if (string.IsNullOrEmpty (format)) {
+        if (string.IsNullOrEmpty(format))
+        {
             return;
         }
-        
-        LogRecord (level, string.Format (format, args));
+
+        LogRecord(level, string.Format(format, args));
     }
     
     #if UNITY_EDITOR || UNITY_STANDALONE
@@ -348,160 +364,184 @@ public sealed class BuglyAgent
         
     }
     #endregion
-    
-    #elif UNITY_ANDROID
-    //  #if UNITY_ANDROID
-    
+
+    #elif UNITY_ANDROID    
     #region Interface for Android
-    private static readonly string GAME_AGENT_CLASS = "com.tencent.bugly.agent.GameAgent";
+    private static readonly string BUGLY_AGENT_CLASS = "com.com.xgcc.utils.BuglyAgent";
     private static readonly int TYPE_U3D_CRASH = 4;
     private static readonly int GAME_TYPE_UNITY = 2;
-    private static bool hasSetGameType = false;
-    private static AndroidJavaClass _gameAgentClass = null;
-    
-    public static AndroidJavaClass GameAgent {
-        get {
-            if (_gameAgentClass == null) {
-                _gameAgentClass = new AndroidJavaClass(GAME_AGENT_CLASS);
-//                using (AndroidJavaClass clazz = new AndroidJavaClass(CLASS_UNITYAGENT)) {
-//                    _gameAgentClass = clazz.CallStatic<AndroidJavaObject> ("getInstance");
-//                }
+    private static AndroidJavaClass s_gameAgentClass = null;
+
+    private static AndroidJavaObject s_appContext = null;
+    private static AndroidJavaObject GetApplicationContext()
+    {
+        if (null != s_appContext)
+        {
+            return s_appContext;
+        }
+        s_appContext = new AndroidJavaClass("com.unity3d.player.UnityPlayer").
+            GetStatic<AndroidJavaObject>("currentActivity").Call<AndroidJavaObject>("getApplicationContext");
+        return s_appContext;
+    }
+
+    public static AndroidJavaClass GameAgent
+    {
+        get
+        {
+            if (s_gameAgentClass == null)
+            {
+                s_gameAgentClass = new AndroidJavaClass(BUGLY_AGENT_CLASS);
             }
-            if (!hasSetGameType) {
-                // set game type: unity(2).
-                _gameAgentClass.CallStatic ("setGameType", GAME_TYPE_UNITY);
-                hasSetGameType = true;
-            }
-            return _gameAgentClass;
+            return s_gameAgentClass;
         }
     }
-    
-    private static string _configChannel;
-    private static string _configVersion;
-    private static string _configUser;
-    private static long _configDelayTime;
-    
-    private static void ConfigDefaultBeforeInit(string channel, string version, string user, long delay){
-        _configChannel = channel;
-        _configVersion = version;
-        _configUser = user;
-        _configDelayTime = delay;
+
+    private static string s_configChannel;
+    private static string s_configVersion;
+    private static string s_configUser;
+    private static long s_configDelayTime;
+
+    private static void ConfigDefaultBeforeInit(string channel, string version, string user, long delay)
+    {
+        s_configChannel = channel;
+        s_configVersion = version;
+        s_configUser = user;
+        s_configDelayTime = delay;
     }
 
     private static bool _configCrashReporterPackage = false;
-    
-    private static void ConfigCrashReporterPackage(){
-        
-        if (!_configCrashReporterPackage) {
-            try {
+    private static void ConfigCrashReporterPackage()
+    {
+        if (!_configCrashReporterPackage)
+        {
+            try
+            {
                 GameAgent.CallStatic("setSdkPackageName", _crashReporterPackage);
                 _configCrashReporterPackage = true;
-            } catch {
-                
+            }
+            catch (Exception ex)
+            {
+                UnityEngine.Debug.LogError($"ConfigCrashReporterPackage...{ex.Message}");
             }
         }
-        
-    }
 
+    }
     private static void InitBuglyAgent(string appId)
     {
-        if (IsInitialized) {
+        if (IsInitialized)
+        {
             return;
         }
-        
-        ConfigCrashReporterPackage();
 
-        try {
-            GameAgent.CallStatic("initCrashReport", appId, _configChannel, _configVersion, _configUser, _configDelayTime);
+        ConfigCrashReporterPackage();
+        try
+        {
+            GameAgent.CallStatic("initCrashReport", appId, s_configChannel, s_configVersion, s_configDelayTime, _debugMode);
             _isInitialized = true;
-        } catch {
-            
+        }
+        catch (Exception ex)
+        {
+            UnityEngine.Debug.LogError($"InitBuglyAgent...{ex.Message}");
         }
     }
-    
-    private static void EnableDebugMode(bool enable){
+
+    private static void EnableDebugMode(bool enable)
+    {
         _debugMode = enable;
-
         ConfigCrashReporterPackage();
-
-        try {
-            GameAgent.CallStatic("setLogEnable", enable);
-        } catch {
-            
-        }
     }
-    
-    private static void SetUserInfo(string userInfo){
-        ConfigCrashReporterPackage();
 
-        try {
-            GameAgent.CallStatic("setUserId", userInfo);
-        } catch {
-        }
-    }
-    
-    private static void ReportException (int type, string name, string reason, string stackTrace, bool quitProgram)
+    private static void SetUserInfo(string userInfo)
     {
         ConfigCrashReporterPackage();
+        try
+        {
+            GameAgent.CallStatic("setUserId", userInfo);
+        }
+        catch (Exception ex)
+        {
+            UnityEngine.Debug.LogError($"SetUserInfo...{ex.Message}");
+        }
+    }
 
-        try {
+    private static void ReportException(int type, string name, string reason, string stackTrace, bool quitProgram)
+    {
+        ConfigCrashReporterPackage();
+        try
+        {
             GameAgent.CallStatic("postException", TYPE_U3D_CRASH, name, reason, stackTrace, quitProgram);
-        } catch {
-            
+        }
+        catch (Exception ex)
+        {
+            UnityEngine.Debug.LogError($"ReportException...{ex.Message}");
         }
     }
-    
-    private static void SetCurrentScene(int sceneId) {
-        ConfigCrashReporterPackage();
 
-        try {
+    private static void SetCurrentScene(int sceneId)
+    {
+        ConfigCrashReporterPackage();
+        try
+        {
             GameAgent.CallStatic("setUserSceneTag", sceneId);
-        } catch {
-            
+        }
+        catch (Exception ex)
+        {
+            UnityEngine.Debug.LogError($"SetCurrentScene...{ex.Message}");
         }
     }
-    
-    private static void SetUnityVersion(){
-        ConfigCrashReporterPackage();
 
-        try {
+    private static void SetUnityVersion()
+    {
+        ConfigCrashReporterPackage();
+        try
+        {
             GameAgent.CallStatic("setSdkConfig", "UnityVersion", Application.unityVersion);
-        } catch {
-            
+        }
+        catch (Exception ex)
+        {
+            UnityEngine.Debug.LogError($"SetUnityVersion...{ex.Message}");
         }
     }
-    
-    private static void AddKeyAndValueInScene(string key, string value){
-        ConfigCrashReporterPackage();
 
-        try {
+    private static void AddKeyAndValueInScene(string key, string value)
+    {
+        ConfigCrashReporterPackage();
+        try
+        {
             GameAgent.CallStatic("putUserData", key, value);
-        } catch {
-            
+        }
+        catch (Exception ex)
+        {
+            UnityEngine.Debug.LogError($"AddKeyAndValueInScene...{ex.Message}");
         }
     }
-    
-    private static void AddExtraDataWithException(string key, string value) {
+
+    private static void AddExtraDataWithException(string key, string value)
+    {
         // no impl
     }
-    
-    private static void LogRecord(LogSeverity level, string message){
-        if (level < LogSeverity.LogWarning) {
-            DebugLog (level.ToString (), message);
+
+    private static void LogRecord(LogSeverity level, string message)
+    {
+        ConfigCrashReporterPackage();
+        if (level < LogSeverity.LogWarning)
+        {
+            DebugLog(level.ToString(), message);
         }
 
-        ConfigCrashReporterPackage();
-        
-        try {
-            GameAgent.CallStatic("printLog", string.Format ("<{0}> - {1}", level.ToString (), message));
-        } catch {
-            
+        try
+        {
+            GameAgent.CallStatic("printLog", string.Format("<{0}> - {1}", level.ToString(), message));
+        }
+        catch (Exception ex)
+        {
+            UnityEngine.Debug.LogError($"LogRecord...{ex.Message}");
         }
     }
-    
+
     #endregion
-    
-    #elif UNITY_IPHONE || UNITY_IOS
+
+#elif UNITY_IPHONE || UNITY_IOS
     
     #region Interface for iOS
     
@@ -670,11 +710,11 @@ public sealed class BuglyAgent
     // dllimport end
     #endregion
     
-    #endif
-    
+#endif
+
     #region Privated Fields and Methods 
     private static event LogCallbackDelegate _LogCallbackEventHandler;
-    
+
     private static bool _isInitialized = false;
     private static LogSeverity _autoReportLogLevel = LogSeverity.LogError;
 
@@ -688,32 +728,37 @@ public sealed class BuglyAgent
     private static int _crashReproterCustomizedLogLevel = 2; // Off=0,Error=1,Warn=2,Info=3,Debug=4
 #endif
 
-    #pragma warning disable 414
+#pragma warning disable 414
     private static bool _debugMode = false;
     private static bool _autoQuitApplicationAfterReport = false;
-    
+
     private static readonly int EXCEPTION_TYPE_UNCAUGHT = 1;
     private static readonly int EXCEPTION_TYPE_CAUGHT = 2;
     private static readonly string _pluginVersion = "1.5.1";
-    
+
     private static Func<Dictionary<string, string>> _LogCallbackExtrasHandler;
-    
-    public static string PluginVersion {
+
+    public static string PluginVersion
+    {
         get { return _pluginVersion; }
     }
-    
-    public static bool IsInitialized {
+
+    public static bool IsInitialized
+    {
         get { return _isInitialized; }
     }
-    
-    public static bool AutoQuitApplicationAfterReport {
+
+    public static bool AutoQuitApplicationAfterReport
+    {
         get { return _autoQuitApplicationAfterReport; }
     }
 
-    private static void _SetCrashReporterType(int type){
+    private static void _SetCrashReporterType(int type)
+    {
         _crashReporterType = type;
 
-        if (_crashReporterType == 2) {
+        if (_crashReporterType == 2)
+        {
 #if UNITY_ANDROID
             _crashReporterPackage = "com.tencent.bugly.msdk";
 #endif
@@ -721,360 +766,435 @@ public sealed class BuglyAgent
 
     }
 
-    private static void _SetCrashReporterLogLevel(int logLevel){
+    private static void _SetCrashReporterLogLevel(int logLevel)
+    {
 #if UNITY_IPHONE || UNITY_IOS
         _crashReproterCustomizedLogLevel = logLevel;
 #endif
     }
 
-    private static void _RegisterExceptionHandler ()
+    private static void _RegisterExceptionHandler()
     {
-        try {
+        try
+        {
             // hold only one instance 
-            
-            #if UNITY_5_3_OR_NEWER
+
+#if UNITY_5_3_OR_NEWER
             Application.logMessageReceived += _OnLogCallbackHandler;
-            #else
+#else
             Application.RegisterLogCallback (_OnLogCallbackHandler);
-            #endif
+#endif
             AppDomain.CurrentDomain.UnhandledException += _OnUncaughtExceptionHandler;
-            
+
             _isInitialized = true;
-            
-            DebugLog (null, "Register the log callback in Unity {0}", Application.unityVersion);
-        } catch {
-            
+
+            DebugLog(null, "Register the log callback in Unity {0}", Application.unityVersion);
         }
-        
-        SetUnityVersion ();
+        catch
+        {
+
+        }
+
+        SetUnityVersion();
     }
-    
-    private static void _UnregisterExceptionHandler ()
+
+    private static void _UnregisterExceptionHandler()
     {
-        try {
-            #if UNITY_5_3_OR_NEWER
+        try
+        {
+#if UNITY_5_3_OR_NEWER
             Application.logMessageReceived -= _OnLogCallbackHandler;
-            #else
+#else
             Application.RegisterLogCallback (null);
-            #endif
+#endif
             System.AppDomain.CurrentDomain.UnhandledException -= _OnUncaughtExceptionHandler;
-            DebugLog (null, "Unregister the log callback in unity {0}", Application.unityVersion);
-        } catch {
-            
+            DebugLog(null, "Unregister the log callback in unity {0}", Application.unityVersion);
+        }
+        catch
+        {
+
         }
     }
-    
-    private static void _OnLogCallbackHandler (string condition, string stackTrace, LogType type)
+
+    private static void _OnLogCallbackHandler(string condition, string stackTrace, LogType type)
     {
-        if (_LogCallbackEventHandler != null) {
-            _LogCallbackEventHandler (condition, stackTrace, type);
+        if (_LogCallbackEventHandler != null)
+        {
+            _LogCallbackEventHandler(condition, stackTrace, type);
         }
-        
-        if (!IsInitialized) {
+
+        if (!IsInitialized)
+        {
             return;
         }
-        
-        if (!string.IsNullOrEmpty (condition) && condition.Contains ("[BuglyAgent] <Log>")) {
+
+        if (!string.IsNullOrEmpty(condition) && condition.Contains("[BuglyAgent] <Log>"))
+        {
             return;
         }
-        
-        if (_uncaughtAutoReportOnce) {
+
+        if (_uncaughtAutoReportOnce)
+        {
             return;
         }
-        
+
         // convert the log level
         LogSeverity logLevel = LogSeverity.Log;
-        switch (type) {
-        case LogType.Exception:
-            logLevel = LogSeverity.LogException;
-            break;
-        case LogType.Error:
-            logLevel = LogSeverity.LogError;
-            break;
-        case LogType.Assert:
-            logLevel = LogSeverity.LogAssert;
-            break;
-        case LogType.Warning:
-            logLevel = LogSeverity.LogWarning;
-            break;
-        case LogType.Log:
-            logLevel = LogSeverity.LogDebug;
-            break;
-        default:
-            break;
+        switch (type)
+        {
+            case LogType.Exception:
+                logLevel = LogSeverity.LogException;
+                break;
+            case LogType.Error:
+                logLevel = LogSeverity.LogError;
+                break;
+            case LogType.Assert:
+                logLevel = LogSeverity.LogAssert;
+                break;
+            case LogType.Warning:
+                logLevel = LogSeverity.LogWarning;
+                break;
+            case LogType.Log:
+                logLevel = LogSeverity.LogDebug;
+                break;
+            default:
+                break;
         }
-        
-        if (LogSeverity.Log == logLevel) {
+
+        if (LogSeverity.Log == logLevel)
+        {
             return;
         }
-        
-        _HandleException (logLevel, null, condition, stackTrace, true);
+
+        _HandleException(logLevel, null, condition, stackTrace, true);
     }
-    
-    private static void _OnUncaughtExceptionHandler (object sender, System.UnhandledExceptionEventArgs args)
+
+    private static void _OnUncaughtExceptionHandler(object sender, System.UnhandledExceptionEventArgs args)
     {
-        if (args == null || args.ExceptionObject == null) {
+        if (args == null || args.ExceptionObject == null)
+        {
             return;
         }
-        
-        try {
-            if (args.ExceptionObject.GetType () != typeof(System.Exception)) {
+
+        try
+        {
+            if (args.ExceptionObject.GetType() != typeof(System.Exception))
+            {
                 return;
             }
-        } catch {
-            if (UnityEngine.Debug.isDebugBuild == true) {
-                UnityEngine.Debug.Log ("BuglyAgent: Failed to report uncaught exception");
+        }
+        catch
+        {
+            if (UnityEngine.Debug.isDebugBuild == true)
+            {
+                UnityEngine.Debug.Log("BuglyAgent: Failed to report uncaught exception");
             }
-            
+
             return;
         }
-        
-        if (!IsInitialized) {
+
+        if (!IsInitialized)
+        {
             return;
         }
-        
-        if (_uncaughtAutoReportOnce) {
+
+        if (_uncaughtAutoReportOnce)
+        {
             return;
         }
-        
-        _HandleException ((System.Exception)args.ExceptionObject, null, true);
+
+        _HandleException((System.Exception)args.ExceptionObject, null, true);
     }
-    
-    private static void _HandleException (System.Exception e, string message, bool uncaught)
+
+    private static void _HandleException(System.Exception e, string message, bool uncaught)
     {
-        if (e == null) {
+        if (e == null)
+        {
             return;
         }
-        
-        if (!IsInitialized) {
+
+        if (!IsInitialized)
+        {
             return;
         }
-        
-        string name = e.GetType ().Name;
+
+        string name = e.GetType().Name;
         string reason = e.Message;
-        
-        if (!string.IsNullOrEmpty (message)) {
-            reason = string.Format ("{0}{1}***{2}", reason, Environment.NewLine, message);
+
+        if (!string.IsNullOrEmpty(message))
+        {
+            reason = string.Format("{0}{1}***{2}", reason, Environment.NewLine, message);
         }
-        
-        StringBuilder stackTraceBuilder = new StringBuilder ("");
-        
-        StackTrace stackTrace = new StackTrace (e, true);
+
+        StringBuilder stackTraceBuilder = new StringBuilder("");
+
+        StackTrace stackTrace = new StackTrace(e, true);
         int count = stackTrace.FrameCount;
-        for (int i = 0; i < count; i++) {
-            StackFrame frame = stackTrace.GetFrame (i);
-            
-            stackTraceBuilder.AppendFormat ("{0}.{1}", frame.GetMethod ().DeclaringType.Name, frame.GetMethod ().Name);
-            
-            ParameterInfo[] parameters = frame.GetMethod ().GetParameters ();
-            if (parameters == null || parameters.Length == 0) {
-                stackTraceBuilder.Append (" () ");
-            } else {
-                stackTraceBuilder.Append (" (");
-                
+        for (int i = 0; i < count; i++)
+        {
+            StackFrame frame = stackTrace.GetFrame(i);
+
+            stackTraceBuilder.AppendFormat("{0}.{1}", frame.GetMethod().DeclaringType.Name, frame.GetMethod().Name);
+
+            ParameterInfo[] parameters = frame.GetMethod().GetParameters();
+            if (parameters == null || parameters.Length == 0)
+            {
+                stackTraceBuilder.Append(" () ");
+            }
+            else
+            {
+                stackTraceBuilder.Append(" (");
+
                 int pcount = parameters.Length;
-                
+
                 ParameterInfo param = null;
-                for (int p = 0; p < pcount; p++) {
-                    param = parameters [p];
-                    stackTraceBuilder.AppendFormat ("{0} {1}", param.ParameterType.Name, param.Name);
-                    
-                    if (p != pcount - 1) {
-                        stackTraceBuilder.Append (", ");
+                for (int p = 0; p < pcount; p++)
+                {
+                    param = parameters[p];
+                    stackTraceBuilder.AppendFormat("{0} {1}", param.ParameterType.Name, param.Name);
+
+                    if (p != pcount - 1)
+                    {
+                        stackTraceBuilder.Append(", ");
                     }
                 }
                 param = null;
-                
-                stackTraceBuilder.Append (") ");
+
+                stackTraceBuilder.Append(") ");
             }
-            
-            string fileName = frame.GetFileName ();
-            if (!string.IsNullOrEmpty (fileName) && !fileName.ToLower ().Equals ("unknown")) {
-                fileName = fileName.Replace ("\\", "/");
-                
-                int loc = fileName.ToLower ().IndexOf ("/assets/");
-                if (loc < 0) {
-                    loc = fileName.ToLower ().IndexOf ("assets/");
+
+            string fileName = frame.GetFileName();
+            if (!string.IsNullOrEmpty(fileName) && !fileName.ToLower().Equals("unknown"))
+            {
+                fileName = fileName.Replace("\\", "/");
+
+                int loc = fileName.ToLower().IndexOf("/assets/");
+                if (loc < 0)
+                {
+                    loc = fileName.ToLower().IndexOf("assets/");
                 }
-                
-                if (loc > 0) {
-                    fileName = fileName.Substring (loc);
+
+                if (loc > 0)
+                {
+                    fileName = fileName.Substring(loc);
                 }
-                
-                stackTraceBuilder.AppendFormat ("(at {0}:{1})", fileName, frame.GetFileLineNumber ());
+
+                stackTraceBuilder.AppendFormat("(at {0}:{1})", fileName, frame.GetFileLineNumber());
             }
-            stackTraceBuilder.AppendLine ();
+            stackTraceBuilder.AppendLine();
         }
-        
+
         // report
-        _reportException (uncaught, name, reason, stackTraceBuilder.ToString ());
+        _reportException(uncaught, name, reason, stackTraceBuilder.ToString());
     }
-    
-    private static void _reportException (bool uncaught, string name, string reason, string stackTrace)
+
+    private static void _reportException(bool uncaught, string name, string reason, string stackTrace)
     {
-        if (string.IsNullOrEmpty (name)) {
+        if (string.IsNullOrEmpty(name))
+        {
             return;
         }
-        
-        if (string.IsNullOrEmpty (stackTrace)) {
-            stackTrace = StackTraceUtility.ExtractStackTrace ();
+
+        if (string.IsNullOrEmpty(stackTrace))
+        {
+            stackTrace = StackTraceUtility.ExtractStackTrace();
         }
-        
-        if (string.IsNullOrEmpty (stackTrace)) {
-            stackTrace = "Empty";           
-        } else {
-            
-            try {
-                string[] frames = stackTrace.Split ('\n');
-                
-                if (frames != null && frames.Length > 0) {
-                    
-                    StringBuilder trimFrameBuilder = new StringBuilder ();
-                    
+
+        if (string.IsNullOrEmpty(stackTrace))
+        {
+            stackTrace = "Empty";
+        }
+        else
+        {
+
+            try
+            {
+                string[] frames = stackTrace.Split('\n');
+
+                if (frames != null && frames.Length > 0)
+                {
+
+                    StringBuilder trimFrameBuilder = new StringBuilder();
+
                     string frame = null;
                     int count = frames.Length;
-                    for (int i = 0; i < count; i++) {
-                        frame = frames [i];
-                        
-                        if (string.IsNullOrEmpty (frame) || string.IsNullOrEmpty (frame.Trim ())) {
+                    for (int i = 0; i < count; i++)
+                    {
+                        frame = frames[i];
+
+                        if (string.IsNullOrEmpty(frame) || string.IsNullOrEmpty(frame.Trim()))
+                        {
                             continue;
                         }
-                        
-                        frame = frame.Trim ();
-                        
+
+                        frame = frame.Trim();
+
                         // System.Collections.Generic
-                        if (frame.StartsWith ("System.Collections.Generic.") || frame.StartsWith ("ShimEnumerator")) {
+                        if (frame.StartsWith("System.Collections.Generic.") || frame.StartsWith("ShimEnumerator"))
+                        {
                             continue;
                         }
-                        if (frame.StartsWith ("Bugly")) {
+                        if (frame.StartsWith("Bugly"))
+                        {
                             continue;
                         }
-                        if (frame.Contains ("..ctor")) {
+                        if (frame.Contains("..ctor"))
+                        {
                             continue;
                         }
-                        
-                        int start = frame.ToLower ().IndexOf ("(at");
-                        int end = frame.ToLower ().IndexOf ("/assets/");
-                        
-                        if (start > 0 && end > 0) {
-                            trimFrameBuilder.AppendFormat ("{0}(at {1}", frame.Substring (0, start).Replace (":", "."), frame.Substring (end));
-                        } else {
-                            trimFrameBuilder.Append (frame.Replace (":", "."));
+
+                        int start = frame.ToLower().IndexOf("(at");
+                        int end = frame.ToLower().IndexOf("/assets/");
+
+                        if (start > 0 && end > 0)
+                        {
+                            trimFrameBuilder.AppendFormat("{0}(at {1}", frame.Substring(0, start).Replace(":", "."), frame.Substring(end));
                         }
-                        
-                        trimFrameBuilder.AppendLine ();
+                        else
+                        {
+                            trimFrameBuilder.Append(frame.Replace(":", "."));
+                        }
+
+                        trimFrameBuilder.AppendLine();
                     }
-                    
-                    stackTrace = trimFrameBuilder.ToString ();
+
+                    stackTrace = trimFrameBuilder.ToString();
                 }
-            } catch {
-                PrintLog(LogSeverity.LogWarning,"{0}", "Error to parse the stack trace");
             }
-            
+            catch
+            {
+                PrintLog(LogSeverity.LogWarning, "{0}", "Error to parse the stack trace");
+            }
+
         }
-        
-        PrintLog (LogSeverity.LogError, "ReportException: {0} {1}\n*********\n{2}\n*********", name, reason, stackTrace);
-        
+
+        PrintLog(LogSeverity.LogError, "ReportException: {0} {1}\n*********\n{2}\n*********", name, reason, stackTrace);
+
         _uncaughtAutoReportOnce = uncaught && _autoQuitApplicationAfterReport;
-        
-        ReportException (uncaught ? EXCEPTION_TYPE_UNCAUGHT : EXCEPTION_TYPE_CAUGHT, name, reason, stackTrace, uncaught && _autoQuitApplicationAfterReport);
+
+        ReportException(uncaught ? EXCEPTION_TYPE_UNCAUGHT : EXCEPTION_TYPE_CAUGHT, name, reason, stackTrace, uncaught && _autoQuitApplicationAfterReport);
     }
-    
-    private static void _HandleException (LogSeverity logLevel, string name, string message, string stackTrace, bool uncaught)
+
+    private static void _HandleException(LogSeverity logLevel, string name, string message, string stackTrace, bool uncaught)
     {
-        if (!IsInitialized) {
-            DebugLog (null, "It has not been initialized.");
+        if (!IsInitialized)
+        {
+            DebugLog(null, "It has not been initialized.");
             return;
         }
-        
-        if (logLevel == LogSeverity.Log) {
+
+        if (logLevel == LogSeverity.Log)
+        {
             return;
         }
-        
-        if ((uncaught && logLevel < _autoReportLogLevel)) {
-            DebugLog (null, "Not report exception for level {0}", logLevel.ToString ());
+
+        if ((uncaught && logLevel < _autoReportLogLevel))
+        {
+            DebugLog(null, "Not report exception for level {0}", logLevel.ToString());
             return;
         }
-        
+
         string type = null;
         string reason = null;
-        
-        if (!string.IsNullOrEmpty (message)) {
-            try {
-                if ((LogSeverity.LogException == logLevel) && message.Contains ("Exception")) {
-                    
-                    Match match = new Regex (@"^(?<errorType>\S+):\s*(?<errorMessage>.*)", RegexOptions.Singleline).Match (message);
-                    
-                    if (match.Success) {
-                        type = match.Groups ["errorType"].Value.Trim();
-                        reason = match.Groups ["errorMessage"].Value.Trim ();
+
+        if (!string.IsNullOrEmpty(message))
+        {
+            try
+            {
+                if ((LogSeverity.LogException == logLevel) && message.Contains("Exception"))
+                {
+
+                    Match match = new Regex(@"^(?<errorType>\S+):\s*(?<errorMessage>.*)", RegexOptions.Singleline).Match(message);
+
+                    if (match.Success)
+                    {
+                        type = match.Groups["errorType"].Value.Trim();
+                        reason = match.Groups["errorMessage"].Value.Trim();
                     }
-                } else if ((LogSeverity.LogError == logLevel) && message.StartsWith ("Unhandled Exception:")) {
-                    
-                    Match match = new Regex (@"^Unhandled\s+Exception:\s*(?<exceptionName>\S+):\s*(?<exceptionDetail>.*)", RegexOptions.Singleline).Match(message);
-                    
-                    if (match.Success) {
-                        string exceptionName = match.Groups ["exceptionName"].Value.Trim();
-                        string exceptionDetail = match.Groups ["exceptionDetail"].Value.Trim ();
-                        
+                }
+                else if ((LogSeverity.LogError == logLevel) && message.StartsWith("Unhandled Exception:"))
+                {
+
+                    Match match = new Regex(@"^Unhandled\s+Exception:\s*(?<exceptionName>\S+):\s*(?<exceptionDetail>.*)", RegexOptions.Singleline).Match(message);
+
+                    if (match.Success)
+                    {
+                        string exceptionName = match.Groups["exceptionName"].Value.Trim();
+                        string exceptionDetail = match.Groups["exceptionDetail"].Value.Trim();
+
                         // 
                         int dotLocation = exceptionName.LastIndexOf(".");
-                        if (dotLocation > 0 && dotLocation != exceptionName.Length) {
+                        if (dotLocation > 0 && dotLocation != exceptionName.Length)
+                        {
                             type = exceptionName.Substring(dotLocation + 1);
-                        } else {
+                        }
+                        else
+                        {
                             type = exceptionName;
                         }
-                        
+
                         int stackLocation = exceptionDetail.IndexOf(" at ");
-                        if (stackLocation > 0) {
+                        if (stackLocation > 0)
+                        {
                             // 
                             reason = exceptionDetail.Substring(0, stackLocation);
                             // substring after " at "
-                            string callStacks = exceptionDetail.Substring(stackLocation + 3).Replace(" at ", "\n").Replace("in <filename unknown>:0","").Replace("[0x00000]","");
+                            string callStacks = exceptionDetail.Substring(stackLocation + 3).Replace(" at ", "\n").Replace("in <filename unknown>:0", "").Replace("[0x00000]", "");
                             //
                             stackTrace = string.Format("{0}\n{1}", stackTrace, callStacks.Trim());
-                            
-                        } else {
+
+                        }
+                        else
+                        {
                             reason = exceptionDetail;
                         }
-                        
+
                         // for LuaScriptException
-                        if(type.Equals("LuaScriptException") && exceptionDetail.Contains(".lua") && exceptionDetail.Contains("stack traceback:")) {
+                        if (type.Equals("LuaScriptException") && exceptionDetail.Contains(".lua") && exceptionDetail.Contains("stack traceback:"))
+                        {
                             stackLocation = exceptionDetail.IndexOf("stack traceback:");
-                            if(stackLocation > 0) {
+                            if (stackLocation > 0)
+                            {
                                 reason = exceptionDetail.Substring(0, stackLocation);
                                 // substring after "stack traceback:"
                                 string callStacks = exceptionDetail.Substring(stackLocation + 16).Replace(" [", " \n[");
-                                
+
                                 //
                                 stackTrace = string.Format("{0}\n{1}", stackTrace, callStacks.Trim());
                             }
                         }
                     }
-                    
+
                 }
-            } catch {
-                
             }
-            
-            if (string.IsNullOrEmpty (reason)) {
+            catch
+            {
+
+            }
+
+            if (string.IsNullOrEmpty(reason))
+            {
                 reason = message;
             }
         }
-        
-        if (string.IsNullOrEmpty (name)) {
-            if (string.IsNullOrEmpty (type)) {
-                type = string.Format ("Unity{0}", logLevel.ToString ());
+
+        if (string.IsNullOrEmpty(name))
+        {
+            if (string.IsNullOrEmpty(type))
+            {
+                type = string.Format("Unity{0}", logLevel.ToString());
             }
-        } else {
+        }
+        else
+        {
             type = name;
         }
-        
-        _reportException (uncaught, type, reason, stackTrace);
+
+        _reportException(uncaught, type, reason, stackTrace);
     }
-    
+
     private static bool _uncaughtAutoReportOnce = false;
-    
+
     #endregion
-    
+
 }
