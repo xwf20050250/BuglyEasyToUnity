@@ -25,8 +25,8 @@ public class Main : MonoBehaviour
         enableLogBtn.onClick.AddListener(OnBtnEnableLogClicked);
         debugBuglyBtn.onClick.AddListener(OnBtnDebugBuglyClicked);
         warningBtn.onClick.AddListener(OnBtnWarningClicked);
-        BuglyAgent.InitWithAppId("80fa77d7fb");
         BuglyAgent.ConfigDebugMode(true);
+        BuglyAgent.InitWithAppId("80fa77d7fb");
         BuglyCustom.Init();
         BuglyCustom.SetCustomLog(BuglyCustom.E_TYPE.E_BUILD_MARK, "E_BUILD_MARK");
         BuglyAgent.SetLogCallbackExtrasHandler(BuglyCustom.GetCustomDict);

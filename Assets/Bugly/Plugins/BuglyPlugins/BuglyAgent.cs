@@ -367,7 +367,7 @@ public sealed class BuglyAgent
 
     #elif UNITY_ANDROID    
     #region Interface for Android
-    private static readonly string BUGLY_AGENT_CLASS = "com.com.xgcc.utils.BuglyAgent";
+    private static readonly string BUGLY_AGENT_CLASS = "com.xgcc.utils.BuglyAgent";
     private static readonly int TYPE_U3D_CRASH = 4;
     private static readonly int GAME_TYPE_UNITY = 2;
     private static AndroidJavaClass s_gameAgentClass = null;
