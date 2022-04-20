@@ -780,7 +780,7 @@ public sealed class BuglyAgent
             // hold only one instance 
 
 #if UNITY_5_3_OR_NEWER
-            Application.logMessageReceived += _OnLogCallbackHandler;
+            Application.logMessageReceivedThreaded += _OnLogCallbackHandler;
 #else
             Application.RegisterLogCallback (_OnLogCallbackHandler);
 #endif
@@ -803,7 +803,7 @@ public sealed class BuglyAgent
         try
         {
 #if UNITY_5_3_OR_NEWER
-            Application.logMessageReceived -= _OnLogCallbackHandler;
+            Application.logMessageReceivedThreaded -= _OnLogCallbackHandler;
 #else
             Application.RegisterLogCallback (null);
 #endif

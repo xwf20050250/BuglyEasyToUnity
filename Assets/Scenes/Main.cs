@@ -26,12 +26,13 @@ public class Main : MonoBehaviour
         debugBuglyBtn.onClick.AddListener(OnBtnDebugBuglyClicked);
         warningBtn.onClick.AddListener(OnBtnWarningClicked);
         BuglyAgent.ConfigDebugMode(true);
-        BuglyAgent.InitWithAppId("80fa77d7fb");
+        BuglyAgent.InitWithAppId("0384ca4213");
         BuglyCustom.Init();
         BuglyCustom.SetCustomLog(BuglyCustom.E_TYPE.E_BUILD_MARK, "E_BUILD_MARK");
         BuglyAgent.SetLogCallbackExtrasHandler(BuglyCustom.GetCustomDict);
         BuglyAgent.EnableExceptionHandler();
         Debug.unityLogger.logEnabled = true;
+        Debug.unityLogger.filterLogType = LogType.Log;
     }
 
     private void OnBtnNullClicked()
