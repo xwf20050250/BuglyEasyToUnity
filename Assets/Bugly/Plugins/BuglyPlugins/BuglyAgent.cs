@@ -46,6 +46,8 @@ public sealed class BuglyAgent
     // Define delegate support multicasting to replace the 'Application.LogCallback'
     public delegate void LogCallbackDelegate(string condition, string stackTrace, LogType type);
 
+    public static Action<string> OnReportLogCallback = null;
+
     /// <summary>
     /// Configs the type of the crash reporter and customized log level to upload
     /// </summary>
@@ -1068,7 +1070,11 @@ public sealed class BuglyAgent
 
         }
 
-        PrintLog(LogSeverity.LogError, "ReportException: {0} {1}\n*********\n{2}\n*********", name, reason, stackTrace);
+        string reportLog = string.Format("ReportException: {0} {1}\n*********\n{2}\n*********", name, reason, stackTrace);
+        PrintLog(LogSeverity.LogError, reportLog);
+#if !UNITY_EDITOR
+        OnReportLogCallback?.Invoke(reportLog);
+#endif
 
         _uncaughtAutoReportOnce = uncaught && _autoQuitApplicationAfterReport;
 

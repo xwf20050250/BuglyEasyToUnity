@@ -31,8 +31,14 @@ public class Main : MonoBehaviour
         BuglyCustom.SetCustomLog(BuglyCustom.E_TYPE.E_BUILD_MARK, "E_BUILD_MARK");
         BuglyAgent.SetLogCallbackExtrasHandler(BuglyCustom.GetCustomDict);
         BuglyAgent.EnableExceptionHandler();
+        BuglyAgent.OnReportLogCallback += OnBuglyReportLogCallback;
         Debug.unityLogger.logEnabled = true;
         Debug.unityLogger.filterLogType = LogType.Log;
+    }
+
+    private void OnBuglyReportLogCallback(string logs)
+    {
+        Debug.Log($"OnBuglyReportLogCallback::logs-{logs}");
     }
 
     private void OnBtnNullClicked()
